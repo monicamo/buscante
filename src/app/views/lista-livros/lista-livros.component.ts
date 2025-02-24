@@ -31,7 +31,7 @@ export class ListaLivrosComponent {
     switchMap((valorDigitado) => this.service.buscar(valorDigitado)),
     tap((retornoAPI) => console.log(retornoAPI)),
     map((items) => this.livrosResultadoParaLivros(items)),
-    catchError(erro => {
+    catchError(() => {
       this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.';
       return EMPTY;
 //      return throwError(() => new Error(this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.'))
