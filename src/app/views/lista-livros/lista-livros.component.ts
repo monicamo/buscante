@@ -1,4 +1,4 @@
-import { catchError, debounceTime, distinctUntilChanged, filter, map, Subscription, switchMap, tap, throwError } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, Subscription, switchMap, tap, throwError } from 'rxjs';
 import { Component, OnDestroy } from '@angular/core';
 import { LivroService } from 'src/app/service/livro.service';
 import { LivroVolumeInfo } from 'src/app/models/livroVolumeInfo';
@@ -19,6 +19,8 @@ export class ListaLivrosComponent {
   // subscription: Subscription
   // livro: Livro
 
+  mensagemErro = '';
+
   constructor(private service: LivroService) { }
 
   livrosEncontrados$ = this.campoBusca.valueChanges.pipe(
@@ -30,7 +32,9 @@ export class ListaLivrosComponent {
     tap((retornoAPI) => console.log(retornoAPI)),
     map((items) => this.livrosResultadoParaLivros(items)),
     catchError(erro => {
-      return throwError(() => new Error('Ops, ocorreu um erro!'))
+      this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.';
+      return EMPTY;
+//      return throwError(() => new Error(this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.'))
     })
   )
 
