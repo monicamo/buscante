@@ -1,4 +1,5 @@
-import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, Subscription, switchMap, tap, throwError } from 'rxjs';
+import { LivroResultado } from './../../models/interface';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, of, Subscription, switchMap, tap, throwError } from 'rxjs';
 import { Component, OnDestroy } from '@angular/core';
 import { LivroService } from 'src/app/service/livro.service';
 import { LivroVolumeInfo } from 'src/app/models/livroVolumeInfo';
@@ -18,6 +19,20 @@ export class ListaLivrosComponent {
   campoBusca =new FormControl();
   // subscription: Subscription
   // livro: Livro
+  livrosResultado: LivroResultado;
+
+  totalDeLivros$ =  this.campoBusca.valueChanges.pipe(
+    debounceTime(PAUSA),
+    filter((valorDigitado) => valorDigitado.length >= 3),
+    tap(() => console.log('Fluxo inicial')),
+    distinctUntilChanged(),
+    switchMap((valorDigitado) => this.service.buscar(valorDigitado)),
+    map(resultado => this.livrosResultado = resultado),
+    catchError(erro => {
+      console.log(erro)
+      return of()
+    })
+  )
 
   mensagemErro = '';
 
@@ -30,11 +45,12 @@ export class ListaLivrosComponent {
     distinctUntilChanged(),
     switchMap((valorDigitado) => this.service.buscar(valorDigitado)),
     tap((retornoAPI) => console.log(retornoAPI)),
+    map(resultado => resultado.items ?? []),
     map((items) => this.livrosResultadoParaLivros(items)),
-    catchError(() => {
-      this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.';
-      return EMPTY;
-//      return throwError(() => new Error(this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.'))
+    catchError((erro) => {
+      // this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.';
+      // return EMPTY;
+     return throwError(() => new Error(this.mensagemErro = 'Ops, ocorreu um erro! Recarregue a aplicação.'))
     })
   )
 
